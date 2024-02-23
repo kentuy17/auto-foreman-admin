@@ -73,8 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/employee/info/{empid}', [EmployeeController::class, 'getInfoByEmployeeId']);
     Route::get('/employee/log/{empid}/{date}', [EmployeeController::class, 'getEmployeeActivity']);
+    Route::get('/employee/status/{empid}', [ActivityTrackController::class, 'getActiveStatus']);
+    Route::patch('/employee/status', [ActivityTrackController::class, 'updateActiveStatus']);
 
     Route::get('/tracking/data/{empid}/{date}', [TimeLogsController::class, 'graphData']);
+
+
 });
 
 Route::post('/signup', [AuthController::class, 'signup']);
