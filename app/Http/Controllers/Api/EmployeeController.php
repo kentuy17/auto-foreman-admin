@@ -431,17 +431,61 @@ class EmployeeController extends Controller
             foreach ($position->employees as $emps)
                 array_push($emps_under, $emps->id);
 
+        // $apps = RunningApps::with('employee', 'category')
+        //     ->where('date', $date->toDateString())
+        //     ->whereColumn('time', '<', 'end_time')
+        //     ->whereIn('userid', $emps_under)
+        //     ->orderBy('time', 'asc')
+        //     ->limit(10000)
+        //     ->get();
+
+        // if (count($apps) === 10000) {
+        //     $extra = RunningApps::with('employee', 'category')
+        //         ->where('date', $date->toDateString())
+        //         ->whereColumn('time', '<', 'end_time')
+        //         ->whereIn('userid', $emps_under)
+        //         ->orderBy('id', 'asc')
+        //         ->offset(10000)
+        //         ->limit(10000)
+        //         ->get();
+
+        //     return $extra;
+        // }
+
         $apps = RunningApps::with('employee', 'category')
             ->where('date', $date->toDateString())
             ->whereColumn('time', '<', 'end_time')
             ->whereIn('userid', $emps_under)
-            ->orderBy('id', 'asc')
-            ->get();
+            ->cursor()
+            ->map(function ($running) {
+                $employee = $running->employee;
+                $category = $running->category;
+                return [
+                    'userid' => $running->id,
+                    'description' => $running->description,
+                    'date' => $running->date,
+                    'time' => $running->time,
+                    'end_time' => $running->end_time,
+                    'status' => $running->status,
+                    'employee' => [
+                        'id' => $employee->id,
+                    ],
+                    'category' => [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'is_productive' => $category->is_productive,
+                        'header_name' => $category->header_name,
+                    ]
+                ];
+            });
 
-        $ttl = $is_past ? $this->seconds_month_ttl : $this->seconds_ten_min_ttl;
+        $ttl = $is_past ? 3600 : $this->seconds_ten_min_ttl;
+        // $ttl = $this->seconds_ten_min_ttl;
+        // if ($request->teamId != 2)
         Redis::set('admin_apps:' . $request->teamId . ':' . $date->toDateString(), json_encode($apps), 'EX', $ttl);
 
         return response()->json([
+            'count' => count($apps),
             'redis' => 'miss',
             'date' => $date->toDateString(),
             'data' => $apps ?? [],
@@ -674,6 +718,9 @@ class EmployeeController extends Controller
     public function getInfoByEmployeeId($empid)
     {
         try {
+            if ($empid == 'Kenneth')
+                $empid = 'PH0067';
+
             $employee = Employee::where('employee_id', $empid)->first();
             if (!$employee)
                 return response()->json([
@@ -711,14 +758,13 @@ class EmployeeController extends Controller
             $log = RunningApps::where('userid', $employee->id)
                 ->where('date', $date->toDateString());
 
-            if (count($category_id) > 0)
+            if (count($category_id) > 0) {
                 $log = $log->whereIn('category_id', $category_id);
+            }
 
-            $start = $log->first();
-
-            $end = $log->whereNot('end_time', null)
-                ->orderBy('id', 'desc')
-                ->first();
+            $start = $log->orderBy('time')->get();
+            $end = $log->whereNot('end_time', null)->orderBy('time')->get();
+            $count = $log->count();
         } catch (\Exception $e) {
             return [
                 'error' => $e->getMessage(),
@@ -726,9 +772,9 @@ class EmployeeController extends Controller
             ];
         }
 
-        return !$start && !$end ? [] : [
-            'start' => $start,
-            'end' => $end,
+        return $log->count() == 0 ? [] : [
+            'start' => $start[0],
+            'end' => $end[$count - 1],
             'date' => $date->toDateString(),
         ];
     }
@@ -738,8 +784,10 @@ class EmployeeController extends Controller
         try {
             $categories = AppCategories::all();
             $all = $this->getEmployeeLog($empid, $date);
-            $productive = $this->getEmployeeLog($empid, $date, $categories->where('is_productive', 1)->pluck('id')->toArray());
-            $unproductive = $this->getEmployeeLog($empid, $date, $categories->where('is_productive', 0)->pluck('id')->toArray());
+            $productive = $this->getEmployeeLog($empid, $date, $categories->where('is_productive', 1)
+                ->pluck('id')->toArray());
+            $unproductive = $this->getEmployeeLog($empid, $date, $categories->where('is_productive', 0)
+                ->pluck('id')->toArray());
             $neutral = $this->getEmployeeLog($empid, $date, [6]);
         } catch (\Exception $e) {
             return response()->json([

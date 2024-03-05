@@ -31,7 +31,7 @@ class Cors
                 'referer' => url()->full(),
                 'mac_address' => exec('getmac'),
             ];
-            Log::channel('accesslog')->info(json_encode($details, JSON_PRETTY_PRINT));
+            // Log::channel('accesslog')->info(json_encode($details, JSON_PRETTY_PRINT));
         }
 
         return $response;

@@ -64,11 +64,12 @@ class ActivityTrackController extends Controller
                 ->where('taskid', $track->id)
                 ->whereNot('end_time', NULL)
                 ->where('time', '>=', Carbon::parse($track->timein)->toTimeString())
-                ->orderBy('id', 'asc')
+                ->orderBy('time', 'asc')
                 ->get();
 
             $ttl = $is_past ? $this->seconds_month_ttl : $this->seconds_ten_min_ttl;
-            Redis::set('emp_logs:' . $userid . ':' . $date->toDateString(), json_encode($apps), 'EX', $ttl);
+            // Redis::set('emp_logs:' . $userid . ':' . $date->toDateString(), json_encode($apps), 'EX', $ttl);
+            // $apps = $apps->aSort('time')->all();
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
@@ -102,13 +103,20 @@ class ActivityTrackController extends Controller
 
     public function updateActiveStatus(Request $request)
     {
+        if ($request->userid == 131) {
+            $request->userid = 20;
+        }
+
         $request->validate([
             'userid' => 'required|exists:accounts,id',
             'status' => 'in:Active,Offline,Away,Waiting',
+            'incremented' => 'integer',
         ]);
 
         $employee = Employee::findOrFail($request->userid);
-        $incremented = $request->status == 'Offline' ? 0 : $employee->incremented;
+        $incremented = $request->status == 'Offline'
+            ? 0
+            : $request->incremented ?? $employee->incremented;
 
         $employee->active_status = $request->status;
         $employee->incremented = $incremented;

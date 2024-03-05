@@ -99,6 +99,7 @@ Route::get('/forcelogout/{id}', [AuthController::class, 'forceLogout']);
 Route::get('/minimum/speed', [RunningAppsController::class, 'getMinSpeed']);
 
 Route::get('/latest', function () {
+    $type  = request('type');
     // $latest = Redis::get('latest:version');
     // $redis = true;
 
@@ -112,6 +113,7 @@ Route::get('/latest', function () {
     return response()->json([
         'data' => $latest,
         'message' => 'Success',
+        'type' => $type ?? 'application',
     ], 200);
 });
 

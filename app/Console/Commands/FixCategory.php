@@ -34,8 +34,10 @@ class FixCategory extends Command
             ->limit(10)
             ->get();
 
+        // $categories = AppCategories::where('id', 85)->get();
+
         foreach ($categories as $category) {
-            $updated = RunningApps::whereIn('category_id', [6, 9])
+            $updated = RunningApps::whereIn('category_id', [6])
                 ->where('description', 'LIKE', "%{$category->name}%")
                 ->update([
                     'category_id' => $category->id,

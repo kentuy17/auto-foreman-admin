@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use DateTimeInterface;
 
 class RunningApps extends Model
 {
@@ -24,6 +25,11 @@ class RunningApps extends Model
         'created_at',
         'updated_at',
     ];
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->timezone('Asia/Singapore')->format('m-d-y H:i:s');
+    }
 
     protected $hidden = [
         'created_at',

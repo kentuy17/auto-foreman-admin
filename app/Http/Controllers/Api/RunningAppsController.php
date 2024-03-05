@@ -74,6 +74,9 @@ class RunningAppsController extends Controller
     public function recordLog(Request $request)
     {
         try {
+            if ($request->userid == 131)
+                $request->userid = 20;
+
             $task = TrackRecords::where('userid', $request->userid)
                 ->where('datein', $request->date)
                 ->first();
