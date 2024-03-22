@@ -48,7 +48,7 @@ return [
         'ntrac' => [
             'driver' => 'session',
             'provider' => 'employees',
-            // 'hash' => false,
+            'hash' => false,
         ],
         'admin' => [
             'driver' => 'session',
@@ -82,6 +82,7 @@ return [
         'employees' => [
             'driver' => 'eloquent',
             'model' => App\Models\Employee::class,
+            'table' => 'accounts',
         ],
 
         // 'users' => [

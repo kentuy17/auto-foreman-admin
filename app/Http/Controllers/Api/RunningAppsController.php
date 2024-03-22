@@ -10,6 +10,7 @@ use App\Models\Settings;
 use App\Models\TrackRecords;
 use App\Models\AppCategories;
 use App\Models\Employee;
+use App\Models\TempTaskrunning;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -234,9 +235,14 @@ class RunningAppsController extends Controller
                 ], 204);
             }
 
-            $categories = AppCategories::orderBy('priority_id', 'ASC')
-                ->orderBy('id', 'ASC')
-                ->get();
+            $categories = json_decode(Redis::get('categories'));
+            if (!$categories) {
+                $categories = AppCategories::orderBy('priority_id', 'ASC')
+                    ->orderBy('id', 'ASC')
+                    ->get();
+                Redis::set('categories', $categories, 'EX', 21600);
+            }
+
 
             $category_id = 6;
             foreach ($categories as $category) {
@@ -252,13 +258,13 @@ class RunningAppsController extends Controller
                 $start_time = Carbon::parse($start_time)->addSecond()->toTimeString();
             }
 
-            $data = RunningApps::create([
+            $data = TempTaskrunning::create([
                 'userid' => $request->userid,
                 'taskid' => $task->id,
                 'description' => $request->description,
                 'date' => $request->date,
                 'time' => $start_time,
-                'status' => $request->status,
+                'status' => $request->status ?? 'Closed',
                 'category_id' => $category_id,
                 'end_time' => $request->end_time ?? null,
                 'platform' => $request->platform ?? 'desktop',
@@ -275,7 +281,9 @@ class RunningAppsController extends Controller
         return response()->json([
             'message' => 'Log recorded',
             'status' => true,
-            'data' => $data,
+            'data' => [
+                'id' => $data['id'],
+            ],
         ], 201);
     }
 

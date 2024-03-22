@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
 
 use App\Http\Requests\EmployeeLoginRequest;
+use App\Http\Requests\RegisterRequest;
 
 use App\Models\Employee;
 use App\Models\Position;
@@ -49,8 +50,11 @@ class AuthController extends Controller
 
     public function appLogin(EmployeeLoginRequest $request)
     {
-        $credentials = $request->validated();
-        if (!Auth::guard('ntrac')->attempt($credentials)) {
+        // $credentials = $request->validated();
+        if (!Auth::guard('ntrac')->attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ])) {
             return response([
                 'message' => 'Provided email or password is incorrect'
             ], 422);
@@ -62,23 +66,28 @@ class AuthController extends Controller
         return response(compact('user', 'token'));
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $position = Position::find($request->position_id);
+        $data = $request->validated();
+        $position = Position::find($data['position_id']);
+        $password = $request->password ?? '123456';
+
         $user = Employee::create([
-            'employee_id' => $request->employee_id,
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'position_id' => $request->position_id,
+            'employee_id' => $data['employee_id'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'position_id' => $data['position_id'],
             'position' => json_encode([$position->position, $position->id]),
-            'username' => $request->username ?? $request->employee_id,
+            'username' => $request->username ?? $data['employee_id'],
             'type' => 'User',
             'status' => 'Pending',
             'department' => $position->department,
             'phone_no' => $request->phone_no,
             'incremented' => 0,
             'active_status' => 'Offline',
+            'password' => bcrypt($password),
+            'site' => $request->site ?? 'Dumaguete',
         ]);
 
         $token = $user->createToken('employee')->plainTextToken;

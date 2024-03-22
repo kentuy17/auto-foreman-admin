@@ -31,13 +31,21 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('/users', UserController::class);
-    Route::apiResource('/categories', AppCategoriesController::class);
+    // Route::apiResource('/categories', AppCategoriesController::class);
     Route::apiResource('/runningapps', RunningAppsController::class);
     Route::apiResource('/employees', EmployeeController::class);
     Route::apiResource('/timelogs', TimeLogsController::class);
 
     Route::get('/employee/{id}', [EmployeeController::class, 'getEmployeeById']);
     Route::get('/teams', [EmployeeController::class, 'getTeams']);
+    Route::get('/accounts', [EmployeeController::class, 'getAccounts']);
+
+    // Categories
+    Route::get('/categories', [AppCategoriesController::class, 'index']);
+    Route::get('/categories/{id}', [AppCategoriesController::class, 'show']);
+    Route::post('/categories', [AppCategoriesController::class, 'store']);
+    Route::put('/categories', [AppCategoriesController::class, 'update']);
+    Route::delete('/categories/{id}', [AppCategoriesController::class, 'destroy']);
 
     // Settings
     Route::post('/reset-password', [UserController::class, 'resetPassword']);
@@ -100,7 +108,9 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // employee registration
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login/employee', [AuthController::class, 'appLogin']);
+Route::post('/app-login', [AuthController::class, 'appLogin']);
+
+Route::get('/positions', [EmployeeController::class, 'getPositions']);
 
 
 Route::get('/employees/image/{id}', [EmployeeController::class, 'getImageById']);

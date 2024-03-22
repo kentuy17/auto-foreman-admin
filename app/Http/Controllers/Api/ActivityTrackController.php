@@ -118,9 +118,12 @@ class ActivityTrackController extends Controller
         //     ? 0
         //     : $request->incremented ?? $employee->incremented;
 
-        // $employee->active_status = $request->status;
+        $employee->active_status = $request->status;
+        if ($request->status == 'Offline') {
+            $employee->incremented = 0;
+        }
         // $employee->incremented = $incremented;
-        // $employee->save();
+        $employee->save();
 
         return response()->json([
             'data' => $employee,

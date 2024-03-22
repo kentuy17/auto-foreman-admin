@@ -17,18 +17,21 @@ class Employee extends Authenticatable
 
     protected $fillable = [
         'id',
+        'employee_id',
         'user_image',
         'first_name',
         'last_name',
         'position',
+        'team_id',
         'department',
         'username',
         'email',
         'type',
         'status',
         'active_status',
-        'location',
+        'site',
         'password',
+        'position_id',
     ];
 
     protected $hidden = [
