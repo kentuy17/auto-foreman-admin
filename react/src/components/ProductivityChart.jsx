@@ -157,7 +157,6 @@ const ProductivityChart = () => {
                 // display: true,
                 drawOnChartArea: true,
                 drawTicks: false,
-                borderDash: [5, 5],
                 color: function (context) {
                   if (context.tick.value === 8) {
                     return "#000";
@@ -165,7 +164,7 @@ const ProductivityChart = () => {
                 },
               },
               border: {
-                display: false,
+                dash: [2, 4],
               },
               gridLines: {
                 drawBorder: false,
