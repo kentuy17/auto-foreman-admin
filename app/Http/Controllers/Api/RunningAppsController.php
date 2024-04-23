@@ -321,4 +321,18 @@ class RunningAppsController extends Controller
             ]
         ]);
     }
+
+    public function getNeutralApps(Request $request)
+    {
+        try {
+            $apps = RunningApps::with('employee')
+                ->where('category_id', 6)
+                ->where('date', $request->date)
+                ->paginate($request->per_page ?? 15);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
+
+        return $apps;
+    }
 }

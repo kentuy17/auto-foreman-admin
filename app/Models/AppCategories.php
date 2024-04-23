@@ -22,6 +22,8 @@ class AppCategories extends Model
         'abbreviation',
         'priority_id',
         'update_status',
+        'reason',
+        'edited_by',
         'created_at',
         'updated_at',
     ];

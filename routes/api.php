@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // NEW API HERE
     Route::put('/record', [RunningAppsController::class, 'recordLog'])->name('record');
     Route::patch('/record', [RunningAppsController::class, 'updateLog'])->name('record-update');
+    Route::get('/apps/neutral', [RunningAppsController::class, 'getNeutralApps']);
 
     Route::put('/record/vdi', [RunningAppsController::class, 'recordVDILog']);
 
