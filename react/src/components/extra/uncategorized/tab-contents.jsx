@@ -13,6 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "./data-table";
 import { useStateContext } from "@/context/ContextProvider";
 import { DataTableColumnHeader } from "./data-table-column-header";
+import { PlusIcon } from '@radix-ui/react-icons';
+import { NewCategory } from './new-category';
 
 const TabContents = () => {
   const { date } = useDashboardContext();
@@ -111,6 +113,22 @@ const TabContents = () => {
         header: () => <div>Date</div>,
         footer: (props) => props.column.id,
       },
+      {
+        accessorKey: "id",
+        header: () => <div>Action</div>,
+        cell: ({ row, getValue }) => {
+          return (row.getCanExpand() &&
+            <NewCategory trigger={<Button
+              size="sm"
+              className="h-7"
+              onClick={() => console.log(row.original.description)}
+            >
+              <PlusIcon className="h-4 w-4" strokeWidth={1.5} />
+            </Button>} termValue={row.original.description} />
+          )
+        },
+        footer: (props) => props.column.id,
+      },
     ],
     []
   );
@@ -123,12 +141,11 @@ const TabContents = () => {
       let subRow = {
         id: item.userid,
         totalDuration: item.duration ?? 0,
-        // employee: `${item.employee.first_name} ${item.employee.last_name}`,
-        // description: item.description,
         description: `${item.employee.first_name} ${item.employee.last_name}`,
         count: item.time,
         date: item.end_time,
         level: 2,
+        logId: item.id
       };
 
       if (!neutralLogs.includes(item.description)) {
@@ -141,6 +158,7 @@ const TabContents = () => {
           date: item.date,
           level: 1,
           subRows: [subRow],
+          logId: null
         });
         neutralLogs.push(item.description);
       } else {

@@ -5,13 +5,13 @@ const StateContext = createContext({
   currentTeam: null,
   token: null,
   notification: null,
-  setUser: () => {},
-  setToken: () => {},
-  setNotification: () => {},
-  setFilterString: () => {},
-  setEmployees: () => {},
-  setTeams: () => {},
-  setCurrentTeam: () => {},
+  setUser: () => { },
+  setToken: () => { },
+  setNotification: () => { },
+  setFilterString: () => { },
+  setEmployees: () => { },
+  setTeams: () => { },
+  setCurrentTeam: () => { },
 });
 
 export const ContextProvider = ({ children }) => {

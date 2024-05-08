@@ -55,7 +55,7 @@ const formSchema = z.object({
   applyChanges: z.boolean(),
 });
 
-export const NewCategory = ({ className }) => {
+export const NewCategory = ({ className, trigger, termValue }) => {
   const [open, setOpen] = useState(false);
   const handleClose = () => setOpen(false);
 
@@ -64,9 +64,9 @@ export const NewCategory = ({ className }) => {
     defaultValues: {
       productivityType: "1",
       priorityLevel: "2",
-      term: "",
-      description: "",
-      headerName: "",
+      term: termValue ?? "",
+      description: termValue ?? "",
+      headerName: termValue ?? "",
       applyChanges: false,
     },
   });
@@ -125,10 +125,11 @@ export const NewCategory = ({ className }) => {
       className="sm:max-w-[425px]"
     >
       <DialogTrigger asChild>
-        <Button className={cn("mr-3 h-8 px-2 lg:px-3", className)}>
+        {/* <Button className={cn("mr-3 h-8 px-2 lg:px-3", className)}>
           <FilePlusIcon className="ml-2 h-4 w-4" />
           Add Category
-        </Button>
+        </Button> */}
+        {trigger}
       </DialogTrigger>
       <DialogContent className="grid gap-6">
         <DialogHeader>
