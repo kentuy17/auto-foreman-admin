@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "chart.js";
 import * as Utils from "./../assets/utils";
-import { secondsToHuman } from "@/lib/timehash";
+//import { secondsToHuman } from "@/lib/timehash";
 import axiosClient from "@/axios-client";
 import moment from "moment";
 import React, { useRef } from "react";
@@ -34,7 +34,7 @@ const COLORS = {
 const getProductivity = async (date) => {
   const currentUrl = window.location.href;
 
-  const url = new URL(currentUrl); // 'URL' should start with a capital letter
+  const url = new URL(currentUrl);
   const id = url.pathname.split("/").pop();
 
   const { data } = await axiosClient.get(
@@ -222,7 +222,7 @@ const ActivityChart = ({ isLoading }) => {
         if (minutes > 0 || hours > 0) {
           result += minutes + "m ";
         }
-        return result.trim(); // Trim any trailing space
+        return result.trim(); 
       }
       
       
