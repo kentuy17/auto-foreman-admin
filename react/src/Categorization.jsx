@@ -58,20 +58,6 @@ const Categorization = () => {
     },
   });
 
-  useEffect(() => {
-    window.Echo.channel('export')
-      .listen('ReportExported', (e) => {
-        console.log(e);
-      })
-
-    // window.Echo.channel('orders.1')
-    //   .listen('OrderShipmentStatusUpdated', (e) => {
-    //     console.log(e);
-    //   });
-    // window.Echo.channel('user')
-    //   .listen
-  }, []);
-
   return (
     <DashboardContextProvider>
       <div className="flex-1 space-y-4 p-8 pt-6">

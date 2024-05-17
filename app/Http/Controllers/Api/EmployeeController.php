@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Jobs\TriggerGenerateJob;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Http\Resources\AppCategoriesResource;
 use App\Http\Resources\EmployeeResource;
+use App\Jobs\GenerateReportJob;
 use App\Models\AppCategories;
+use App\Models\ExportHistory;
+use App\Models\ExtractTrackingData;
 use App\Models\ManagerTeam;
 use App\Models\Position;
 use App\Models\RunningApps;
@@ -25,6 +29,11 @@ class EmployeeController extends Controller
     private $seconds_ten_min_ttl = 600; // 10min
 
     private $seconds_month_ttl = 86400; // 1d
+
+    public function __construct()
+    {
+        ini_set('max_execution_time', 300);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -522,26 +531,25 @@ class EmployeeController extends Controller
         ]);
 
         $date = Carbon::parse($request->date) ?? Carbon::now();
-	$is_past = Carbon::now()->startOfDay()->gt($date);
+        $is_past = Carbon::now()->startOfDay()->gt($date);
 
-	if(!request()->has('empId')){
+        if (!request()->has('empId')) {
 
-        $redis_apps = Redis::get('category_apps:' . $request->teamId . ':' . $date->toDateString() . ':' . $request->isProductive);
+            $redis_apps = Redis::get('category_apps:' . $request->teamId . ':' . $date->toDateString() . ':' . $request->isProductive);
 
-        if ($redis_apps != "[]" && $redis_apps != null)
-            return response()->json([
-                'count' => count(json_decode($redis_apps)),
-                'redis' => 'hit',
-                'data' => json_decode($redis_apps),
-                'date' => $date->toDateString(),
-	    ]);
-	
+            if ($redis_apps != "[]" && $redis_apps != null)
+                return response()->json([
+                    'count' => count(json_decode($redis_apps)),
+                    'redis' => 'hit',
+                    'data' => json_decode($redis_apps),
+                    'date' => $date->toDateString(),
+                ]);
 
-        $emps_under = Employee::select('id')
-		->where('team_id', $request->teamId)->get();
-	} else {
-	  $emps_under = [$request->empId];
-	}
+            $emps_under = Employee::select('id')
+                ->where('team_id', $request->teamId)->get();
+        } else {
+            $emps_under = [$request->empId];
+        }
 
         $categories = AppCategories::select('id')
             ->where('is_productive', $request->isProductive)->get();
@@ -582,10 +590,10 @@ class EmployeeController extends Controller
                 }
             });
 
-	if(!request()->has('empId')){
-          $ttl = $is_past ? 3600 : $this->seconds_ten_min_ttl;
-	  Redis::set('category_apps:' . $request->teamId . ':' . $date->toDateString() . ':' . $request->isProductive, json_encode($data), 'EX', $ttl);
-	}
+        if (!request()->has('empId')) {
+            $ttl = $is_past ? 3600 : $this->seconds_ten_min_ttl;
+            Redis::set('category_apps:' . $request->teamId . ':' . $date->toDateString() . ':' . $request->isProductive, json_encode($data), 'EX', $ttl);
+        }
 
         return response()->json([
             'count' => count($data),
@@ -720,44 +728,47 @@ class EmployeeController extends Controller
         try {
             $from = Carbon::parse($from)->toDateString();
             $to = $to ?? Carbon::now()->toDateString();
+            $data = [];
 
-            $data = TrackRecords::with('employee', 'tasks')
+            foreach (request('employees') as $employee) {
+                $data[] = $employee;
+            }
+
+            $items = TrackRecords::with('employee')
                 ->whereIn('userid', request('employees'))
                 ->whereBetween('datein', [$from, $to])
-                ->cursor()->map(function ($track) {
-                    $check = Redis::get('exTrack:' . $track->userid . ':' . $track->datein);
-                    if ($check != "[]" && $check != null) {
-                        return json_decode($check);
-                    }
+                ->whereNot('dateout', null)
+                ->get();
 
-                    $tasks = [];
-                    foreach ($track->tasks as $task) {
-                        if (!$task->category) continue;
-                        $duration = Carbon::parse($task->end_time)->diffInSeconds($task->time);
-                        $tasks[] = [
-                            'duration' => $duration > 18000 // 5 hours
-                                ? 86400 - $duration
-                                : $duration,
-                            'category' => $task->category->only(['is_productive']),
-                        ];
-                    }
+            $export = ExportHistory::create([
+                'userid' => Auth::user()->id,
+                'type' => 'tracking',
+                'employees' => json_encode(request('employees')),
+                'start_date' => $from,
+                'end_date' => $to,
+                'item_count' => count($items),
+                'team_name' => Team::find(request('teamId'))->name
+            ]);
 
-                    $return = [
-                        'id' => $track->id,
-                        'userid' => $track->userid,
-                        'datein' => $track->datein,
-                        'timeout' => $track->timeout,
-                        'timein' => $track->timein,
-                        'dateout' => $track->dateout,
-                        'tasks' => $tasks,
-                        'employee' => $track->employee,
-                    ];
+            foreach ($items as $track) {
+                # code...
+                $extract = ExtractTrackingData::create([
+                    'user_id' => $export->userid,
+                    'report_id' => $export->id,
+                    'employee_id' => $track->userid,
+                    'date' => $track->datein,
+                    'time_in' => $track->timein,
+                    'time_out' => $track->timeout,
+                    'productive_duration' => 0,
+                    'unproductive_duration' => 0,
+                    'neutral_duration' => 0,
+                ]);
 
-                    $ttl = Carbon::parse($track->datein)->isCurrentDay() ? 600 : 86400;
-                    Redis::set('exTrack:' . $track->userid . ":" . $track->datein, json_encode($return), 'EX', $ttl);
-
-                    return $return;
-                });
+                if ($extract) {
+                    GenerateReportJob::dispatchSync($export, $track, $extract);
+                    TriggerGenerateJob::dispatchSync($extract);
+                }
+            }
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
@@ -765,9 +776,9 @@ class EmployeeController extends Controller
             ], 500);
         }
 
-        $data_count = count($data);
+        $data_count = count($items);
         return response()->json([
-            'data' => $data ?? [],
+            'data' => $items ?? [],
             'message' => $data_count > 0 ? 'Success' : 'Records not found',
             'count' => $data_count,
         ]);

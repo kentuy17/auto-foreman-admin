@@ -9,10 +9,12 @@ use App\Http\Requests\SignupRequest;
 
 use App\Http\Requests\EmployeeLoginRequest;
 use App\Http\Requests\RegisterRequest;
-
+use App\Models\AppCategories;
 use App\Models\Employee;
+use App\Models\ExportHistory;
 use App\Models\Position;
 use App\Models\Team;
+use App\Models\TrackRecords;
 use App\Models\User;
 
 use Illuminate\Http\Request;
@@ -132,14 +134,28 @@ class AuthController extends Controller
     public function testReverb()
     {
         // $user = Auth::user();
-        $user = User::find(1);
-        // event(new ReportExported($user));
-        ReportExported::dispatch($user);
+        $report = ExportHistory::find(1);
+        $items = TrackRecords::with('employee')
+            ->where('userid', $report->employee_id)
+            ->whereBetween('datein', [$report->start_date, $report->end_date])
+            ->get();
 
+        $cat_prod = AppCategories::select('id')->where('is_productive', 1)->get();
+        $cat_unprod = AppCategories::select('id')->where('is_productive', 0)->get();
+        $cat_neu = AppCategories::select('id')->where('is_productive', 2)->get();
+
+        $productive = $items[0]->tasks->whereIn('category_id', $cat_prod->pluck('id'))->sum('duration');
+
+        // $productive = $items[0]->tasks->whereIn('category_id', [6])->sum('duration');
+        // dd($productive);
         return response()->json([
-            'userId' => $user->id,
-            'status' => 'OK',
-            // 'event' => $event,
-        ], 200);
+            'data' => $productive,
+        ]);
+
+        // return response()->json([
+        //     'userId' => $user->id,
+        //     'status' => 'OK',
+        //     // 'event' => $event,
+        // ], 200);
     }
 }

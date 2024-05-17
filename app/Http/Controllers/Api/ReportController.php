@@ -7,7 +7,8 @@ use App\Models\RunningApps;
 use App\Models\Employee;
 use App\Models\Bug;
 use App\Models\Anomaly;
-
+use App\Models\ExportHistory;
+use App\Models\ExtractTrackingData;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
@@ -83,6 +84,57 @@ class ReportController extends Controller
             'data' => $anomalies,
             'message' => 'Success',
             'redis' => false,
+        ], 200);
+    }
+
+    public function getReportHistoryByManager(Request $request)
+    {
+        $request->validate([
+            'userId' => 'exists:users,id',
+            'teamId' => 'exists:teams,id'
+        ]);
+
+        $history = ExportHistory::where('userid', $request->userId)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return response()->json([
+            'data' => $history
+        ]);
+    }
+
+    public function updateReportHistory(Request $request)
+    {
+        $request->validate([
+            'id' => 'exists:export_history,id|required',
+            'status' => 'in:failed,completed,pending,started|required'
+        ]);
+
+        $update = ExportHistory::find($request->id)->update([
+            'status' => $request->status
+        ]);
+
+        return response()->json([
+            'data' => $update,
+            'message' => 'Status updated.'
+        ], 200);
+    }
+
+    public function downloadReports(Request $request)
+    {
+        try {
+            if ($request->moduleType == 'tracking') {
+                $data = ExtractTrackingData::with('employee')
+                    ->where('report_id', $request->reportId)->get();
+            }
+        } catch (\Throwable $th) {
+            throw $th->getMessage();
+        }
+
+
+        return response()->json([
+            'data' => $data ?? [],
+            'message' => 'Success'
         ], 200);
     }
 }

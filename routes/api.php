@@ -8,7 +8,8 @@ use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\RunningAppsController;
 use App\Http\Controllers\Api\TimeLogsController;
 use App\Http\Controllers\Api\ReportController;
-
+use App\Models\ExportHistory;
+use App\Models\TrackRecords;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Redis;
@@ -79,7 +80,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reports/bugs', [ReportController::class, 'getBugReports']);
     Route::put('/reports/bugs', [ReportController::class, 'insertBugReports']);
     Route::get('/reports/anomalies', [ReportController::class, 'getAnomalyReport']);
-    //
+    Route::get('/reports/history', [ReportController::class, 'getReportHistoryByManager']);
+    Route::post('/report/update-history', [ReportController::class, 'updateReportHistory']);
+
+    Route::get('/reports/download', [ReportController::class, 'downloadReports']);
 
     // UserApproval
     Route::get('/userapproval', [EmployeeController::class, 'getUserForApproval']);

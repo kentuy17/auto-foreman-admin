@@ -4,8 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { ReportCard } from "./components/extra/report-card";
 import moment from "moment";
 import { secondsToHuman } from "./lib/timehash";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertDialogTemplate } from "./components/layout/report-alert-dialog";
+
+import ExportHistory from './components/extra/export-history/export-history';
+import { echoInstance } from './lib/echo';
 
 export const getWorkDuration = (data, show = true) => {
   if (!moment(data.datein).isSame(moment(), "day") && data.timeout === null) {
@@ -16,15 +19,16 @@ export const getWorkDuration = (data, show = true) => {
     moment(data.datein).isSame(moment(), "day") && data.timeout === null
       ? moment().diff(moment(data.timein, "HH:mm:ss"), "seconds")
       : moment(data.timeout, "HH:mm:ss").diff(
-          moment(data.timein, "HH:mm:ss"),
-          "seconds"
-        );
+        moment(data.timein, "HH:mm:ss"),
+        "seconds"
+      );
   return secondsToHuman(diff);
 };
 
 function Report() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedModule, setSelectedModule] = useState("attendance");
+  const historyRef = useRef(null)
 
   const handleAppsExport = () => {
     setSelectedModule("applications");
@@ -41,6 +45,15 @@ function Report() {
     setDialogOpen(!dialogOpen);
   };
 
+  const handleClickHist = () => historyRef.current?.focus();
+
+  useEffect(() => {
+    echoInstance.channel('report')
+      .listen('ReportExported', (e) => {
+        console.log(e);
+      })
+  }, [])
+
   return (
     <DashboardContextProvider>
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -55,7 +68,7 @@ function Report() {
               <TabsTrigger value="generate" className="relative">
                 Generate Export
               </TabsTrigger>
-              <TabsTrigger value="late">Export History</TabsTrigger>
+              <TabsTrigger ref={historyRef} value="history">Export History</TabsTrigger>
             </TabsList>
           </div>
           {/* Generate Reports Tab */}
@@ -91,6 +104,9 @@ function Report() {
               <div className="col-span-2 grid items-start gap-6 lg:col-span-2 lg:grid-cols-2 xl:col-span-1 xl:grid-cols-1"></div>
             </div>
           </TabsContent>
+          <TabsContent value='history'>
+            <ExportHistory />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -99,6 +115,7 @@ function Report() {
         open={dialogOpen}
         module={selectedModule}
         setDialogOpen={setDialogOpen}
+        handleClickHist={handleClickHist}
       >
         {/* <FilterCard /> */}
       </AlertDialogTemplate>

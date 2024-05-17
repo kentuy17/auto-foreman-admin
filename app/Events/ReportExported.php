@@ -30,9 +30,6 @@ class ReportExported implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        // return [
-        // new PrivateChannel('export.' . $this->user->id)
-        // ];
         return new Channel('export');
     }
 }

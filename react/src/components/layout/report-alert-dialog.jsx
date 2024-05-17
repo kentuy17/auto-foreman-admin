@@ -89,11 +89,11 @@ const getTotalWorkedKuno = (timein, timeout, data) => {
     !moment(timein).isSame(moment(), "day") && timeout === null
       ? data[data.length - 1].time
       : moment(timeout, "HH:mm:ss").diff(
-          moment(timein, "HH:mm:ss"),
-          "seconds"
-        ) > 0
-      ? timeout
-      : "23:59:59";
+        moment(timein, "HH:mm:ss"),
+        "seconds"
+      ) > 0
+        ? timeout
+        : "23:59:59";
   let diff =
     moment(timein).isSame(moment(), "day") && timeout === null
       ? moment().diff(moment(timein, "HH:mm:ss"), "seconds")
@@ -189,6 +189,7 @@ export const AlertDialogTemplate = ({
   open,
   setDialogOpen,
   module = "attendance",
+  handleClickHist
 }) => {
   const [employees, setEmployees] = useState([]);
   const { currentTeam } = useStateContext();
@@ -203,12 +204,8 @@ export const AlertDialogTemplate = ({
   const handlePeriordChange = (period) => {
     setPeriod(period);
     setDisabledDate(period !== "custom");
-    // setDisabledDate(false);
   };
 
-  // useEffect(() => {
-  //   console.log(dateRange, "dateRange");
-  // }, [dateRange]);
 
   const onSubmit = (data) => {
     setDialogOpen(false);
@@ -221,11 +218,28 @@ export const AlertDialogTemplate = ({
           .get(`/reports/${module}/${from}/${to}`, {
             params: {
               employees: data.employees,
+              teamId: currentTeam
             },
           })
-          .then((resp) => resolve(formatExcelData(resp.data.data, module)))
+          .then((resp) => resolve(resp))
           .catch((err) => reject(err));
       });
+
+    if (module === 'tracking') {
+      toast.promise(promise, {
+        loading: 'Generating reports data...',
+        success: (resp) => `Downloading...`,
+        error: (err) => console.log(err),
+        action: {
+          label: 'Show',
+          onClick: () => {
+            handleClickHist()
+            console.log('should redirect to export history page')
+          }
+        }
+      })
+      return;
+    }
 
     toast.promise(promise, {
       loading: "Generating reports data...",
@@ -259,7 +273,6 @@ export const AlertDialogTemplate = ({
         );
       })
       .catch((err) => console.log(err));
-    console.log(employees, "employees");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTeam]);
 
@@ -369,14 +382,14 @@ export const AlertDialogTemplate = ({
                                 onCheckedChange={(checked) => {
                                   return checked
                                     ? field.onChange([
-                                        ...field.value,
-                                        employee.id,
-                                      ])
+                                      ...field.value,
+                                      employee.id,
+                                    ])
                                     : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== employee.id
-                                        )
-                                      );
+                                      field.value?.filter(
+                                        (value) => value !== employee.id
+                                      )
+                                    );
                                 }}
                               />
                             </FormControl>
