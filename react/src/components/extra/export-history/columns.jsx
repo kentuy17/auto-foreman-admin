@@ -1,9 +1,9 @@
+import { useState } from 'react';
+import { echoInstance } from '@/lib/echo';
+import { cn } from '@/lib/utils';
+
 import { Badge } from "@ui/badge";
 import { Checkbox } from "@ui/checkbox";
-
-import { DataTableColumnHeader } from "./data-table-column-header";
-import { DataTableRowActions } from "./data-table-row-actions"
-
 import {
   ArrowDownIcon,
   ArrowRightIcon,
@@ -16,9 +16,9 @@ import {
 } from "@radix-ui/react-icons";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
-import { useEffect, useState } from 'react';
-import { echoInstance } from '@/lib/echo';
-import { cn } from '@/lib/utils';
+
+import { DataTableColumnHeader } from "./data-table-column-header";
+import { DataTableRowActions } from "./data-table-row-actions"
 
 const labels = [
   {
@@ -82,18 +82,16 @@ export const priorities = [
 ];
 
 function ProgressLoader({ item }) {
-  const butaw = 100 / item.item_count;
   const [percentage, setPercentage] = useState(0)
+  const butaw = 100 / item.item_count;
 
-  useEffect(() => {
-    echoInstance.channel('export')
-      .listen('ReportExported', (e) => {
-        let processedFile = e.user;
-        if ((processedFile.export_id === item.id) && (percentage < 100)) {
-          setPercentage(butaw * processedFile.items_completed)
-        }
-      })
-  }, [])
+  echoInstance.channel('export')
+    .listen('ReportExported', (e) => {
+      let processedFile = e.user;
+      if ((processedFile.export_id === item.id) && (percentage < 100)) {
+        setPercentage(butaw * processedFile.items_completed)
+      }
+    })
 
   console.log(percentage, 'percentage');
 

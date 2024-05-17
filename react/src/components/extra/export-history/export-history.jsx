@@ -15,7 +15,7 @@ const ExportHistory = () => {
   const { date } = useDashboardContext();
   const { currentTeam, user } = useStateContext();
 
-  const { isLoading, error, data, refetch } = useQuery({
+  const { isLoading, data } = useQuery({
     queryKey: ["history", date, currentTeam],
     queryFn: async () => {
       const res = await axiosClient.get("/reports/history", {

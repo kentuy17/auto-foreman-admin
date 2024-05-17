@@ -101,7 +101,7 @@ const getTotalWorkedKuno = (timein, timeout, data) => {
   return diff;
 };
 
-const formatExcelData = (data, module) => {
+export const formatExcelData = (data, module) => {
   if (module === "attendance") {
     return data.map((d) => {
       return {

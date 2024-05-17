@@ -8,7 +8,7 @@ import Navbar from "./layout/Navbar.jsx";
 import { Sidebar } from "./extra/sidebar";
 import { playlists } from "./data/playlists";
 import { Toaster } from "./ui/sonner";
-import { echoInstance } from '@/lib/echo';
+// import { echoInstance } from '@/lib/echo';
 
 export default function DefaultLayout() {
   const { token, setUser } = useStateContext();

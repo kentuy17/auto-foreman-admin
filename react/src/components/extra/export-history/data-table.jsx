@@ -20,7 +20,7 @@ import {
 } from "@ui/table";
 
 import { DataTablePagination } from "./data-table-pagination";
-import { DataTableToolbar } from "./data-table-toolbar";
+// import { DataTableToolbar } from "./data-table-toolbar";
 
 export function DataTable({ columns, data }) {
   const [rowSelection, setRowSelection] = React.useState({});

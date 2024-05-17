@@ -1,5 +1,5 @@
 import { DashboardContextProvider } from "@/context/DashboardContextProvider";
-import { Separator } from "@ui/separator";
+// import { Separator } from "@ui/separator";
 //<<<<<<<<< Temporary merge branch 1
 //import { columns } from "@/components/extra/categories/columns";
 //import { DataTable } from "@/components/extra/categories/data-table";
@@ -11,11 +11,11 @@ import axiosClient from "./axios-client";
 import moment from "moment";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import TabContents from "./components/extra/uncategorized/tab-contents";
-import { DateRangePicker } from "./components/extra/date-range-picker";
+// import { DateRangePicker } from "./components/extra/date-range-picker";
 import { DatePicker } from "./components/extra/date-picker";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from 'react';
-// import * as Echo from './lib/echo'
+// import { useEffect } from 'react';
+// import { Button } from "@/components/ui/button";
 
 import Echo from 'laravel-echo';
 
@@ -33,7 +33,7 @@ window.Echo = new Echo({
   withoutInterceptors: true,
 });
 
-import { Button } from "@/components/ui/button";
+
 
 const Categorization = () => {
   const { isLoading, isError, data } = useQuery({
