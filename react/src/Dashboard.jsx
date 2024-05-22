@@ -18,6 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import TeamWorkHours from "./components/extra/team-work-hours";
 import { Skeleton } from "./components/ui/skeleton";
 import { useStateContext } from "./context/ContextProvider";
+// import { Textarea } from './components/ui/textarea';
+import StreamListener from './components/extra/stream-listener';
 
 const CATEGORY = ["Unproductive", "Productive", "Neutral"];
 
@@ -272,6 +274,9 @@ function Dashboard() {
                 apps={appList.Neutral}
                 className={"bg-muted text-muted-foreground"}
               />
+
+              <StreamListener />
+
             </div>
           </div>
         </TabsContent>

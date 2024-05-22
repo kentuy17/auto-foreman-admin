@@ -121,6 +121,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/insertRequest', [EmployeeController::class, 'insertRequestApproval']);
 
     Route::get('/reverb', [AuthController::class, 'testReverb']);
+
+
+    // Route::get('/stream', function() {
+    //     return
+    // });
 });
 
 Route::post('/signup', [AuthController::class, 'signup']);

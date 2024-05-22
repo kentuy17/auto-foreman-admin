@@ -195,7 +195,7 @@ class RunningAppsController extends Controller
                 'description' => 'required|not_in:Away,Windows Default Lock Screen',
             ]);
 
-            Redis::set('incremented:' . $request->userid, Carbon::now()->timestamp);
+            // Redis::set('incremented:' . $request->userid, Carbon::now()->timestamp);
             $emp = Employee::find($request->userid);
             $emp->active_status = 'Active';
             $emp->save();
@@ -218,39 +218,42 @@ class RunningAppsController extends Controller
 
             $timein = Carbon::parse($task->timein);
             $req_time = Carbon::parse($request->time);
-            $prev_desc = Redis::get('prev:description:' . $request->userid);
-            $prev_start_time = Redis::get('prev:start_time:' . $request->userid);
+            // $prev_desc = Redis::get('prev:description:' . $request->userid);
+            // $prev_start_time = Redis::get('prev:start_time:' . $request->userid);
 
             if ($timein->gt($req_time)) {
                 $task->timein = $request->time;
                 $task->save();
             }
 
-            if ($prev_desc == $request->description && $request->type == 'actual' && $prev_start_time == $request->time) {
-                $prev = RunningApps::select('end_time')
-                    ->where('userid', $request->userid)
-                    ->where('description', $prev_desc)
-                    ->orderBy('id', 'DESC')
-                    ->first();
+            // if ($prev_desc == $request->description && $request->type == 'actual' && $prev_start_time == $request->time) {
+            //     $prev = RunningApps::select('end_time')
+            //         ->where('userid', $request->userid)
+            //         ->where('description', $prev_desc)
+            //         ->orderBy('id', 'DESC')
+            //         ->first();
 
-                if ($prev) {
-                    $prev->end_time = $request->end_time;
-                    $prev->save();
-                }
+            //     if ($prev) {
+            //         $prev->end_time = $request->end_time;
+            //         $prev->save();
+            //     }
 
-                return response()->json([
-                    'message' => 'end_time updated.',
-                    'status' => true,
-                ], 204);
-            }
+            //     return response()->json([
+            //         'message' => 'end_time updated.',
+            //         'status' => true,
+            //     ], 204);
+            // }
 
-            $categories = json_decode(Redis::get('categories'));
-            if (!$categories) {
-                $categories = AppCategories::orderBy('priority_id', 'ASC')
-                    ->orderBy('id', 'ASC')
-                    ->get();
-                Redis::set('categories', $categories, 'EX', 21600);
-            }
+            // $categories = json_decode(Redis::get('categories'));
+            $categories = AppCategories::orderBy('priority_id', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->get();
+            // if (!$categories) {
+            //     $categories = AppCategories::orderBy('priority_id', 'ASC')
+            //         ->orderBy('id', 'ASC')
+            //         ->get();
+            //     Redis::set('categories', $categories, 'EX', 21600);
+            // }
 
 
             $category_id = 6;
@@ -261,11 +264,11 @@ class RunningAppsController extends Controller
                 }
             }
 
-            $prev_end_time = Redis::get('prev:end_time:' . $request->userid);
+            // $prev_end_time = Redis::get('prev:end_time:' . $request->userid);
             $start_time = $request->time;
-            if (Carbon::parse($prev_end_time)->gt(Carbon::parse($start_time))) {
-                $start_time = Carbon::parse($start_time)->addSecond()->toTimeString();
-            }
+            // if (Carbon::parse($prev_end_time)->gt(Carbon::parse($start_time))) {
+            //     $start_time = Carbon::parse($start_time)->addSecond()->toTimeString();
+            // }
 
             $data = TempTaskrunning::create([
                 'userid' => $request->userid,
@@ -280,9 +283,9 @@ class RunningAppsController extends Controller
                 'type' => $request->type ?? 'actual',
             ]);
 
-            Redis::set('prev:end_time:' . $request->userid, $request->end_time, 'EX', 1200);
-            Redis::set('prev:description:' . $request->userid, $request->description, 'EX', 1200);
-            Redis::set('prev:start_time:' . $request->userid, $request->time, 'EX', 1200);
+            // Redis::set('prev:end_time:' . $request->userid, $request->end_time, 'EX', 1200);
+            // Redis::set('prev:description:' . $request->userid, $request->description, 'EX', 1200);
+            // Redis::set('prev:start_time:' . $request->userid, $request->time, 'EX', 1200);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage(), 'status' => false], 500);
         }

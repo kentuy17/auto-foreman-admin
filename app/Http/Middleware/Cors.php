@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class Cors
 {
@@ -18,6 +19,9 @@ class Cors
 
         $response = $next($request);
         foreach ($headers as $key => $value) {
+            if (request()->route()->uri() == 'stream')
+                continue;
+
             $response->header($key, $value);
         }
 
