@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('export_history', function (Blueprint $table) {
-            $table->string('employees')->nullable(true);
+            // $table->string('employees')->nullable(true);
             $table->integer('item_count')->default(0);
             // $table->addColumn('integer', 'item_count');
             $table->string('team_name')->nullable(true);
