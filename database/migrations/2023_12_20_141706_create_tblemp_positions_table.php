@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('department')->nullable();
             $table->integer('manager_id')->nullable();
+            $table->unsignedBigInteger('team_id')->nullable();
             $table->boolean('active')->default(1);
             $table->timestamps();
         });

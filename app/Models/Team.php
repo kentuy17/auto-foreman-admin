@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,8 +19,8 @@ class Team extends Model
         'member_count',
     ];
 
-    public function team()
+    public function manager()
     {
-        return $this->belongsTo(Manager::class, 'manager_id');
+        return $this->belongsTo(User::class, 'manager_id');
     }
 }

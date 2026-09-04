@@ -16,9 +16,12 @@ return new class extends Migration
             $table->string('type');
             $table->integer('userid');
             $table->integer('employee_id');
+            $table->string('filename')->nullable();
             $table->string('employees')->nullable(true);
             $table->date('start_date');
             $table->date('end_date');
+            $table->integer('item_count')->default(0);
+            $table->string('team_name')->nullable();
             $table->enum('status', ['pending', 'started', 'completed', 'failed', 'cancelled'])->default('pending');
             $table->timestamps();
         });

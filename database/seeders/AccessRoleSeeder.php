@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\TimeLogs;
+use App\Models\AccessRole;
 use Illuminate\Database\Seeder;
 
-class TimeLogsSeeder extends Seeder
+class AccessRoleSeeder extends Seeder
 {
     public function run(): void
     {
-        TimeLogs::factory()->count(5)->create();
+        AccessRole::factory()->count(5)->create();
     }
 }

@@ -16,6 +16,13 @@ return new class extends Migration
             $table->string('name')->nullable();
             $table->string('description')->nullable();
             $table->boolean('is_productive');
+            $table->string('header_name')->nullable();
+            $table->string('icon')->nullable();
+            $table->string('abbreviation')->nullable();
+            $table->unsignedInteger('priority_id')->nullable();
+            $table->string('update_status')->nullable();
+            $table->text('reason')->nullable();
+            $table->unsignedBigInteger('edited_by')->nullable();
             $table->timestamps();
         });
     }

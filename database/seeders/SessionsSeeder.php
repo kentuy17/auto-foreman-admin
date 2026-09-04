@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\TimeLogs;
+use App\Models\Sessions;
 use Illuminate\Database\Seeder;
 
-class TimeLogsSeeder extends Seeder
+class SessionsSeeder extends Seeder
 {
     public function run(): void
     {
-        TimeLogs::factory()->count(5)->create();
+        Sessions::factory()->count(5)->create();
     }
 }
