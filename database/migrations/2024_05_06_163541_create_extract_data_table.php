@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('extract_data');
+        Schema::dropIfExists('extract_tracking_data');
     }
 };

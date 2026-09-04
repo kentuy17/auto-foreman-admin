@@ -16,4 +16,14 @@ class ManagerTeam extends Model
         'team_id',
         'manager_id',
     ];
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
 }

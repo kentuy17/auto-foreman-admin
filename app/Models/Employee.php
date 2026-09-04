@@ -46,7 +46,7 @@ class Employee extends Authenticatable
 
     public function anomalies()
     {
-        return $this->hasMany(TrackRecords::class, 'userid');
+        return $this->hasMany(Anomaly::class, 'userid');
     }
 
     public function runningapps()

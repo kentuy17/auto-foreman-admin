@@ -17,6 +17,11 @@ return new class extends Migration
             $table->time('timein');
             $table->time('timeout');
             $table->date('datein');
+            $table->time('timebreakin')->nullable();
+            $table->date('datebreakin')->nullable();
+            $table->time('timebreakout')->nullable();
+            $table->date('datebreakout')->nullable();
+            $table->date('dateout')->nullable();
             $table->timestamps();
         });
     }

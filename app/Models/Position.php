@@ -26,6 +26,11 @@ class Position extends Model
         return $this->belongsTo(User::class, 'manager_id', 'id');
     }
 
+    public function team()
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
     public function employees()
     {
         return $this->hasMany(Employee::class, 'position_id', 'id');

@@ -50,7 +50,7 @@ class User extends Authenticatable
 
     public function employees()
     {
-        return $this->positions()->employees();
+        return $this->hasManyThrough(Employee::class, Position::class, 'manager_id', 'position_id', 'id', 'id');
     }
 
     public function manager_teams()
