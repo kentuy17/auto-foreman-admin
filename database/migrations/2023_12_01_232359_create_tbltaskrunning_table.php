@@ -17,8 +17,10 @@ return new class extends Migration
             $table->integer('category_id')->nullable();
             $table->string('taskid');
             $table->integer('userid');
-            $table->time('time');
-            $table->date('date');
+            $table->time('time')->default(DB::raw('CURRENT_TIME'));
+            $table->time('end_time')->default(DB::raw('CURRENT_TIME'));
+            // $table->time('end_time', 2);
+            $table->date('date')->default(DB::raw('CURRENT_DATE'));
             $table->timestamps();
         });
     }

@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('tbltaskrunning', 'end_time')) {
-            Schema::table('tbltaskrunning', function (Blueprint $table) {
-                $table->time('end_time', 2);
-            });
-        }
+        Schema::table('accounts', function (Blueprint $table) {
+            //
+            $table->integer('team_id')->nullable();
+        });
     }
 
     /**
@@ -23,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('tbltaskrunning', function (Blueprint $table) {
-            $table->dropColumn('end_time');
+        Schema::table('accounts', function (Blueprint $table) {
+            //
         });
     }
 };
